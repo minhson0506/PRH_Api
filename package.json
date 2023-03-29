@@ -1,0 +1,45 @@
+{
+    "name": "prh_api",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "ts-node src/index.ts",
+        "dev": "nodemon src/index.ts",
+        "build": "tsc",
+        "lint": "eslint --fix src test",
+        "test": "jest --detectOpenHandles --forceExit"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/minhson0506/PRH_Api.git"
+    },
+    "keywords": [],
+    "author": "Son Dang",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/minhson0506/PRH_Api/issues"
+    },
+    "homepage": "https://github.com/minhson0506/PRH_Api#readme",
+    "devDependencies": {
+        "@types/cors": "^2.8.13",
+        "@types/express": "^4.17.17",
+        "@types/jest": "^29.5.0",
+        "@types/morgan": "^1.9.4",
+        "@types/node": "^18.15.10",
+        "ts-node": "^10.9.1",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.0.2"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.3",
+        "express": "^4.18.2",
+        "helmet": "^6.0.1",
+        "morgan": "^1.10.0",
+        "mysql2": "^3.2.0",
+        "nodemon": "^2.0.22",
+        "supertest": "^6.3.3",
+        "ts-jest": "^29.0.5"
+    }
+}
