@@ -27,7 +27,7 @@ $ git clone git@github.com:minhson0506/PRH_Api.git
 ```
 2. Open project in Visual Studio
 
-4. Create database in local:
+3. Create database in local:
 <li>	Connect to your database server as a root user on command line: mysql -u root -p / mysql -u root -p / mysql (command depends on you operating system/version installed) or using the MariaDB Client application (Windows) and create a database and a user with privileges on it:
 <li>	CREATE DATABASE PRH;
 <li>	CREATE USER 'demo'@'localhost' identified by 'Password123@';;
@@ -36,7 +36,7 @@ $ git clone git@github.com:minhson0506/PRH_Api.git
 <li>	FLUSH PRIVILEGES;
 exit
 
-5. Create file .env in root folder of project with content (same level with src folder)
+4. Create file .env in root folder of project with content (same level with src folder)
 ```
 NODE_ENV=development
 PORT=3000
@@ -51,6 +51,11 @@ DB_PASS=Password123@
 $ npm i
 
 $ npm run dev
+```
+
+6. Test project.
+```
+$ npm run test
 ```
 
 

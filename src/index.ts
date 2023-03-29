@@ -13,7 +13,6 @@ app.listen(port, async () => {
 
     // get all data from PRH and post it to database
     getData()
-
 });
 
 
