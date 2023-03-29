@@ -1,7 +1,18 @@
 import {ResultSetHeader} from "mysql2";
 import CustomError from "../../classes/CustomError";
 import {promisePool} from "../../database/db";
-import {BaseInformation, CompanyDetails, GetCompany} from "../../interfaces/Company";
+import {GetAddress} from "../../interfaces/Address";
+import {GetAuxiliaryName} from "../../interfaces/AuxiliaryName";
+import {GetBusinessIdChange} from "../../interfaces/BusinessIdChange";
+import {GetBusinessLine} from "../../interfaces/BusinessLine";
+import {CompanyDetails, GetCompany} from "../../interfaces/Company";
+import {GetCompanyForm} from "../../interfaces/CompanyForm";
+import {GetContactDetail} from "../../interfaces/ContactDetails";
+import {GetLanguage} from "../../interfaces/Language";
+import {GetLiquidation} from "../../interfaces/Liquidation";
+import {GetName} from "../../interfaces/Name";
+import {GetRegistedOffice} from "../../interfaces/RegistedOffice";
+import {GetRegisterEntry} from "../../interfaces/RegisterEntry";
 
 const postCompany = async (company: CompanyDetails, postalCode: string): Promise<number> => {
 
@@ -282,17 +293,84 @@ const postCompany = async (company: CompanyDetails, postalCode: string): Promise
 }
 
 const getCompaniesByPostalCode = async (postalCode: string) => {
-    const [response] = await promisePool.execute<GetCompany[]>(
+    let [response] = await promisePool.execute<GetCompany[]>(
         `
-        SELECT * FROM companies WHERE postalCode = ?;
-        `
+        SELECT businessId, postalCode, name, registrationDate, companyForm, detailsUri
+        FROM companies 
+        WHERE postalCode = ?;`
         , [postalCode]
     );
 
     if (response.length === 0) {
         throw new CustomError('No companies found', 404);
     }
-    return response;
+    const companies = Promise.all(response.map(async (company) => {
+        // get data from another tables
+        const [liquidations] = await promisePool.execute<GetLiquidation[]>(
+            `SELECT * FROM liquidations WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [names] = await promisePool.execute<GetName[]>(
+            `SELECT * FROM names WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [auxiliaryName] = await promisePool.execute<GetAuxiliaryName[]>(
+            `SELECT * FROM auxiliaryNames WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [addresses] = await promisePool.execute<GetAddress[]>(
+            `SELECT * FROM addresses WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [companyForms] = await promisePool.execute<GetCompanyForm[]>(
+            `SELECT * FROM companyForms WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [businessLines] = await promisePool.execute<GetBusinessLine[]>(
+            `SELECT * FROM businessLines WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [languages] = await promisePool.execute<GetLanguage[]>(
+            `SELECT * FROM languages WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [registedOffices] = await promisePool.execute<GetRegistedOffice[]>(
+            `SELECT * FROM registedOffices WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [contactDetails] = await promisePool.execute<GetContactDetail[]>(
+            `SELECT * FROM contactDetails WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [registerEntries] = await promisePool.execute<GetRegisterEntry[]>(
+            `SELECT * FROM registerEntries WHERE businessId = ?;`, [company.businessId]
+        );
+
+        const [businessIdChanges] = await promisePool.execute<GetBusinessIdChange[]>(
+            `SELECT * FROM businessIdChanges WHERE businessId = ?;`, [company.businessId]
+        );
+
+        return {
+            businessId: company.businessId,
+            postCode: company.postalCode,
+            name: company.name,
+            registrationDate: company.registrationDate,
+            companyForm: company.companyForm,
+            detailsUri: company.detailsUri,
+            liquidations: liquidations,
+            names: names,
+            auxiliaryName: auxiliaryName,
+            addresses: addresses,
+            companyForms: companyForms,
+            businessLines: businessLines,
+            languages: languages,
+            registedOffices: registedOffices,
+            contactDetails: contactDetails,
+            registerEntries: registerEntries,
+            businessIdChanges: businessIdChanges
+        };
+    }));
+    return companies;
 }
 
 

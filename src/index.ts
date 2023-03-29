@@ -12,7 +12,7 @@ app.listen(port, async () => {
     /* eslint-enable no-console */
 
     // get all data from PRH and post it to database
-    // getData()
+    getData()
 
 });
 

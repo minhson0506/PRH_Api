@@ -3,7 +3,6 @@
 import {postCompany} from "../api/models/companyModel"
 import CustomError from "../classes/CustomError"
 import {promisePool} from "../database/db"
-import {Company} from "../interfaces/Company"
 import {PRHCompany, PRHCompanyDetails} from "../interfaces/PRHCompany"
 import {baseUrlCompanyId, baseUrlPRH, postalCodes} from "./variables"
 
@@ -46,25 +45,20 @@ async function requestData<TResponse>(
         if (!isPostalCode) {
             url = baseUrlCompanyId + input
         }
-        console.log(url)
         const response = await fetch(url, config)
         const data = await response.json()
         return data as TResponse
     } catch (error) {
-        console.log(error)
         throw new CustomError("Error when getting data from PRH", 404)
     }
 }
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
+// init database
 const initDB = async () => {
     try {
         // drop table if it is exists
         await promisePool.execute("DROP TABLE IF EXISTS companies;");
-        await promisePool.execute("DROP TABLE IF EXISTS liquidataions;");
+        await promisePool.execute("DROP TABLE IF EXISTS liquidations;");
         await promisePool.execute("DROP TABLE IF EXISTS names;");
         await promisePool.execute("DROP TABLE IF EXISTS auxiliaryNames;");
         await promisePool.execute("DROP TABLE IF EXISTS addresses;");
@@ -85,7 +79,7 @@ const initDB = async () => {
 
         await promisePool.execute(
             `
-            CREATE TABLE IF NOT EXISTS liquidataions
+            CREATE TABLE IF NOT EXISTS liquidations
             (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, name VARCHAR(255), type VARCHAR(255), version INT, registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
             PRIMARY KEY (id));`);
 
