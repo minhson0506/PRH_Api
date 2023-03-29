@@ -1,3 +1,5 @@
+import {Company} from "./Company";
+
 interface PRHCompany {
     type: string;
     version: number;

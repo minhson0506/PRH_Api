@@ -27,38 +27,10 @@ app.use(function (req, res, next) {
     next();
 })
 
-app.get('/', async (req, res) => {
-    const url = 'http://avoindata.prh.fi/bis/v1?totalResults=true&maxResults=20&resultsFrom=0&streetAddressPostCode=02100&companyRegistrationFrom=2014-02-28'
-
-    await requestData<PRHCompany>(url).then((data) => {
-        console.log(data)
-    })
-
+app.get('/', (req, res) => {
     res.json({
         message: 'Api for getting data from PRH'
     })
 })
-
-// Make the `request` function generic
-// to specify the return data type:
-async function requestData<TResponse>(
-    url: string,
-    // `RequestInit` is a type for configuring 
-    // a `fetch` request. By default, an empty object.
-    config: RequestInit = {}
-
-    // This function is async, it will return a Promise:
-): Promise<TResponse> {
-
-    // Inside, we call the `fetch` function with 
-    // a URL and config given:
-    try {
-        const response = await fetch(url, config)
-        const data = await response.json()
-        return data as TResponse
-    } catch (error) {
-        throw new CustomError("Error when getting data from PRH", 404)
-    }
-}
 
 export default app
