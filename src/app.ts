@@ -3,8 +3,8 @@ import express from 'express'
 import morgan from 'morgan'
 import cors from 'cors'
 import helmet from 'helmet'
-import {PRHCompany} from './interfaces/PRHCompany'
-import CustomError from './classes/CustomError'
+import api from './api'
+import {errorHandler, notFound} from './middlewares'
 
 const app = express()
 
@@ -29,8 +29,13 @@ app.use(function (req, res, next) {
 
 app.get('/', (req, res) => {
     res.json({
-        message: 'Api for getting data from PRH'
+        message: 'Api for getting data from PRH: api/v1'
     })
 })
+
+app.use('/api/v1', api)
+
+app.use(notFound)
+app.use(errorHandler)
 
 export default app

@@ -1,23 +1,31 @@
 // Make the `request` function generic
 
+import {postCompany} from "../api/models/companyModel"
 import CustomError from "../classes/CustomError"
 import {promisePool} from "../database/db"
 import {Company} from "../interfaces/Company"
-import {PRHCompany} from "../interfaces/PRHCompany"
+import {PRHCompany, PRHCompanyDetails} from "../interfaces/PRHCompany"
 import {baseUrlCompanyId, baseUrlPRH, postalCodes} from "./variables"
 
 async function getData() {
+    // init database
     initDB()
+
+    // post data to database
     for (const postalCode of postalCodes) {
         await requestData<PRHCompany>(postalCode).then(async (data) => {
             const companies = data.results
             for (const company of companies) {
-                await requestData<Company>(company.businessId, {}, false).then((data) => {
-                    console.log(data)
+                await requestData<PRHCompanyDetails>(company.businessId, {}, false).then((data) => {
+                    // post data to database
+                    if (data.results.length > 0) {
+                        postCompany(data.results[0], postalCode)
+                    }
                 })
             }
         })
     }
+    console.log("Data is ready")
 }
 
 // to specify the return data type:
@@ -38,7 +46,6 @@ async function requestData<TResponse>(
         if (!isPostalCode) {
             url = baseUrlCompanyId + input
         }
-        await sleep(1000)
         console.log(url)
         const response = await fetch(url, config)
         const data = await response.json()
@@ -67,88 +74,82 @@ const initDB = async () => {
         await promisePool.execute("DROP TABLE IF EXISTS registerOffices;");
         await promisePool.execute("DROP TABLE IF EXISTS contactDetails;");
         await promisePool.execute("DROP TABLE IF EXISTS registerentries;");
-        await promisePool.execute("DROP TABLE IF EXISTS budinessIdChanges;");
+        await promisePool.execute("DROP TABLE IF EXISTS businessIdChanges;");
 
         // create new table for new data
         await promisePool.execute(
             `
-            CREATE TABLE IF NOT EXISTS baseInformation
-            (id INT NOT NULL AUTO_INCREMENT, registrationDate VARCHAR(255) NOT NULL, endDate VARCHAR(255), language VARCHAR(255) NOT NULL, source INT NOT NULL,
-            PRIMARY KEY (id));`);
-
-        await promisePool.execute(
-            `
             CREATE TABLE IF NOT EXISTS companies 
-            (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255) NOT NULL, businessId VARCHAR(255) NOT NULL, registrationDate VARCHAR(255) NOT NULL, companyForm VARCHAR(255) NOT NULL, detaialUri VARCHAR(255), 
+            (id INT NOT NULL AUTO_INCREMENT, name VARCHAR(255) NOT NULL, businessId VARCHAR(255) NOT NULL, postalCode VARCHAR(255) NOT NULL, registrationDate VARCHAR(255) NOT NULL, companyForm VARCHAR(255) NOT NULL, detailsUri VARCHAR(255), 
             PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
             CREATE TABLE IF NOT EXISTS liquidataions
-            (businessId VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, version INT NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, name VARCHAR(255), type VARCHAR(255), version INT, registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
             CREATE TABLE IF NOT EXISTS names
-            (businessId VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, orders INT NOT NULL, version INT NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, name VARCHAR(255), orders INT, version INT, registrationDate VARCHAR(255), endDate VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
             CREATE TABLE IF NOT EXISTS auxiliaryNames
-            (businessId VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, orders INT NOT NULL, version INT NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, name VARCHAR(255), orders INT, version INT, registrationDate VARCHAR(255), endDate VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
             CREATE TABLE IF NOT EXISTS addresses
-            (businessId VARCHAR(255) NOT NULL, careOf VARCHAR(255), street VARCHAR(255) NOT NULL, postalCode VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, version INT NOT NULL, city VARCHAR(255) NOT NULL, country VARCHAR(255) NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, careOf VARCHAR(255), street VARCHAR(255), postCode VARCHAR(255), type VARCHAR(255), version INT, city VARCHAR(255), country VARCHAR(255), registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
-            CREATE TABLE IF NOT EXISTS companyForm
-            (businessId VARCHAR(255) NOT NULL, version INT NOT NULL, name VARCHAR(255) NOT NULL, type VARCHAR(255), baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            CREATE TABLE IF NOT EXISTS companyForms
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, version INT, name VARCHAR(255), type VARCHAR(255), registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
             CREATE TABLE IF NOT EXISTS businessLines
-            (businessId VARCHAR(255) NOT NULL, orders INT NOT NULL, version INT NOT NULL, code VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, orders INT, version INT, code VARCHAR(255), name VARCHAR(255), registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
             CREATE TABLE IF NOT EXISTS languages
-            (businessId VARCHAR(255) NOT NULL, version INT NOT NULL, name VARCHAR(255) NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, version INT, name VARCHAR(255), registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
-            CREATE TABLE IF NOT EXISTS registerOffices
-            (businessId VARCHAR(255) NOT NULL, version INT NOT NULL, name VARCHAR(255) NOT NULL, orders INT NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            CREATE TABLE IF NOT EXISTS registedOffices
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, version INT, name VARCHAR(255), orders INT, registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
             CREATE TABLE IF NOT EXISTS contactDetails
-            (businessId VARCHAR(255) NOT NULL, version INT NOT NULL, value VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, baseId INT NOT NULL,
-            PRIMARY KEY (businessId));`);
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, version INT, value VARCHAR(255), type VARCHAR(255), registrationDate VARCHAR(255), endDate VARCHAR(255), language VARCHAR(255), source INT,
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
-            CREATE TABLE IF NOT EXISTS registerentries
-            (businessId VARCHAR(255) NOT NULL, authority INT NOT NULL, register INT NOT NULL, status INT NOT NULL, registrationDate VARCHAR(255) NOT NULL, 
-            endDate VARCHAR(255), statusDate VARCHAR(255) NOT NULL, language VARCHAR(255) NOT NULL, description VARCHAR(255) NOT NULL,
-            PRIMARY KEY (businessId));`);
+            CREATE TABLE IF NOT EXISTS registerEntries
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, authority INT, register INT, status INT, registrationDate VARCHAR(255), 
+            endDate VARCHAR(255), statusDate VARCHAR(255), language VARCHAR(255), description VARCHAR(255),
+            PRIMARY KEY (id));`);
 
         await promisePool.execute(
             `
-            CREATE TABLE IF NOT EXISTS budinessIdChanges
-            (businessId VARCHAR(255) NOT NULL, source INT NOT NULL, description VARCHAR(255) NOT NULL, reason VARCHAR(255) NOT NULL, changeDate VARCHAR(255) NOT NULL,
-            changes INT NOT NULL, oldBusinessId VARCHAR(255) NOT NULL, newBusinessId VARCHAR(255) NOT NULL, language VARCHAR(255) NOT NULL,
-            PRIMARY KEY (businessId));`);
+            CREATE TABLE IF NOT EXISTS businessIdChanges
+            (id INT NOT NULL AUTO_INCREMENT, businessId VARCHAR(255) NOT NULL, source INT, description VARCHAR(255), changeDate VARCHAR(255),
+            changes VARCHAR(255), oldBusinessId VARCHAR(255), newBusinessId VARCHAR(255), language VARCHAR(255),
+            PRIMARY KEY (id));`);
 
 
     } catch (error) {

@@ -1,6 +1,6 @@
-import {Company} from "./Company";
+import {Company, CompanyDetails} from "./Company";
 
-interface PRHCompany {
+interface PRHBaseInformation {
     type: string;
     version: number;
     totalResults: number;
@@ -8,7 +8,13 @@ interface PRHCompany {
     previousResultsUri: string | null;
     nextResultsUri: string | null;
     exceptionNoticeUri: string | null;
+}
+interface PRHCompany extends PRHBaseInformation{
     results: Company[];
 }
 
-export { PRHCompany}
+interface PRHCompanyDetails extends PRHBaseInformation{
+    results: CompanyDetails[];
+}
+
+export { PRHCompany, PRHCompanyDetails}

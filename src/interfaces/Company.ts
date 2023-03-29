@@ -1,20 +1,11 @@
+import {RowDataPacket} from "mysql2";
+
 interface Company {
     businessId: string;
     name: string;
     registrationDate: Date;
-    companyFrom: string;
+    companyForm: string;
     detailsUri: string | null;
-    liquidation: Liquidation[];
-    names: Name[];
-    auxiliaryNames: auxiliaryName[];
-    addresses: Address[];
-    companyForm: CompanyForm[];
-    businessLines: BusinessLines[];
-    languages: Languages[];
-    registerOffices: RegisterOffices[];
-    contactDetails: ContactDetails[];
-    registerentries: Registerentries[];
-    budinessIdChanges: budinessIdChanges[];
 }
 
 interface CompanyDetails extends Company {
@@ -22,100 +13,111 @@ interface CompanyDetails extends Company {
     names: Name[];
     auxiliaryNames: auxiliaryName[];
     addresses: Address[];
-    companyForm: CompanyForm[];
+    companyForms: CompanyForm[];
     businessLines: BusinessLines[];
     languages: Languages[];
-    registerOffices: RegisterOffices[];
+    registedOffices: RegistedOffices[];
     contactDetails: ContactDetails[];
-    registerentries: Registerentries[];
-    budinessIdChanges: budinessIdChanges[];
+    registerEntries: Registerentries[];
+    businessIdChanges: BusinessIdChanges[];
 }
 
 interface BaseInformation {
-    registration: Date;
+    registrationDate: Date | null;
     endDate: Date | null;
-    language: string;
-    source: number;
+    language: string | null;
+    source: number | null;
 }
 
 interface Liquidation extends BaseInformation {
-    version: number;
-    name: string;
-    type: number;
+    version: number | null;
+    name: string | null;
+    type: number | null;
 }
 
-interface Name extends BaseInformation{
-    order: number;
-    version: number;
-    name: string;
+interface Name {
+    order: number | null;
+    version: number | null;
+    name: string | null;
+    registrationDate: Date | null;
+    endDate: Date | null;
+    source: number | null;
 }
 
-interface auxiliaryName extends BaseInformation {
-    order: number;
-    version: number;
-    name: string;
+interface auxiliaryName {
+    order: number | null;
+    version: number | null;
+    name: string | null;
+    registrationDate: Date;
+    endDate: Date | null;
+    source: number | null;
 }
 
-interface Address extends BaseInformation{
+interface Address extends BaseInformation {
     careOf: string | null;
-    street: string;
-    postalCode: string;
-    type: number;
-    version: number;
-    city: string;
+    street: string | null;
+    postCode: string | null;
+    type: number | null;
+    version: number | null;
+    city: string | null;
     country: string | null;
 }
 
 interface CompanyForm extends BaseInformation {
-    version: number;
-    name: string;
-    type: string| null;
+    version: number | null;
+    name: string | null;
+    type: string | null;
 }
 
 interface BusinessLines extends BaseInformation {
-    order: number;
-    version: number;
-    code: string;
-    name: string;
+    order: number | null;
+    version: number | null;
+    code: string | null;
+    name: string | null;
 }
 
 interface Languages extends BaseInformation {
-    version: number;
-    name: string;
+    version: number | null;
+    name: string | null;
 }
 
-interface RegisterOffices extends BaseInformation {
-    order: number;
-    version: number;
-    name: string;
+interface RegistedOffices extends BaseInformation {
+    order: number | null;
+    version: number | null;
+    name: string | null;
 }
 
 interface ContactDetails extends BaseInformation {
-    version: number;
-    value: string;
-    type: string;
+    version: number | null;
+    value: string | null;
+    type: string | null;
 }
 
 interface Registerentries {
-    authority: number;
-    register: number;
-    status: number;
-    registrationDate: Date;
+    authority: number | null;
+    register: number | null;
+    status: number | null;
+    registrationDate: Date | null;
     endDate: Date | null;
-    statusDate: Date;
-    language: string;
-    description: string;
+    statusDate: Date | null;
+    language: string | null;
+    description: string | null;
 }
 
-interface budinessIdChanges {
-    source: number;
-    description: string;
-    reason: string;
-    changedDate: Date;
-    change: number;
-    oldBusinessId: string;
-    newBusinessId: string;
-    language: string;
+interface BusinessIdChanges {
+    source: number | null;
+    description: string | null;
+    changeDate: Date | null;
+    change: string | null;
+    oldBusinessId: string | null;
+    newBusinessId: string | null;
+    language: string | null;
 }
 
-export {Company, CompanyDetails}
+interface CompanyWithPostCode extends CompanyDetails {
+    postCode: string;
+}
+
+interface GetCompany extends RowDataPacket, CompanyWithPostCode {}
+
+export {Company, CompanyDetails, BaseInformation, GetCompany}
