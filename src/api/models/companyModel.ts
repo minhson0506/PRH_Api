@@ -281,11 +281,12 @@ const postCompany = async (company: CompanyDetails, postalCode: string): Promise
     } else return headers.insertId;
 }
 
-const getCompanies = async (postalCode: string) => {
+const getCompaniesByPostalCode = async (postalCode: string) => {
     const [response] = await promisePool.execute<GetCompany[]>(
         `
-        SELECT * FROM companies;
+        SELECT * FROM companies WHERE postalCode = ?;
         `
+        , [postalCode]
     );
 
     if (response.length === 0) {
@@ -295,7 +296,7 @@ const getCompanies = async (postalCode: string) => {
 }
 
 
-export {postCompany};
+export {postCompany, getCompaniesByPostalCode};
 
 
 

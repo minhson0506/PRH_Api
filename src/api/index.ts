@@ -1,5 +1,6 @@
 import express from 'express';
 import MessageResponse from '../interfaces/MessageResponse';
+import companyRoute from './routes/companyRoute';
 
 const router = express.Router();
 
@@ -9,6 +10,6 @@ router.get<{}, MessageResponse>('/', (req, res) => {
     });
 });
 
-// router.use('/orders', orderRoute);
+router.use('/postal_codes', companyRoute);
 
 export default router;

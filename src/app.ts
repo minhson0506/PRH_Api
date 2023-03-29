@@ -29,11 +29,11 @@ app.use(function (req, res, next) {
 
 app.get('/', (req, res) => {
     res.json({
-        message: 'Api for getting data from PRH: api/v1'
+        message: 'Api for getting data from PRH'
     })
 })
 
-app.use('/api/v1', api)
+app.use('/', api)
 
 app.use(notFound)
 app.use(errorHandler)
